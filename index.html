@@ -501,12 +501,12 @@ emailjs.init(EMAILJS_PUBLIC_KEY);
    PRODUCT DATA
 ============================================================ */
 const products = [
-  { id: 1, name: "Trending Magic Gadget", price: 320, img: "https://i.ibb.co/zWZnbS80/file-0000000005c47207981e02b75be5a5cf.png" },
-  { id: 2, name: "Viral Smart Essential", price: 399, img: "https://i.ibb.co/hxX8d3tp/file-00000000b34472078f852d67e2acdda2.png" },
-  { id: 3, name: "Everyday Handy Tool",  price: 219, img: "https://i.ibb.co/bgv3VMbN/file-00000000ad3072098fd19a0ef0a95091.png" },
-  { id: 4, name: "Best Seller Pick",     price: 369, img: "https://i.ibb.co/tpbZDkdt/Picsart-26-06-13-09-31-41-765.png" },
-  { id: 5, name: "Hot Selling Item",     price: 399, img: "https://i.ibb.co/PpDH0k8/IMG-20260613-093218.png" },
-  { id: 6, name: "Customer Favourite",   price: 399, img: "https://i.ibb.co/k64g14Z8/IMG-20260613-121307.jpg" },
+  { id: 1, name: "Product #1 — Trending Magic Gadget", price: 320, img: "https://i.ibb.co/zWZnbS80/file-0000000005c47207981e02b75be5a5cf.png" },
+  { id: 2, name: "Product #2 — Viral Smart Essential", price: 399, img: "https://i.ibb.co/hxX8d3tp/file-00000000b34472078f852d67e2acdda2.png" },
+  { id: 3, name: "Product #3 — Everyday Handy Tool",  price: 219, img: "https://i.ibb.co/bgv3VMbN/file-00000000ad3072098fd19a0ef0a95091.png" },
+  { id: 4, name: "Product #4 — Best Seller Pick",     price: 369, img: "https://i.ibb.co/tpbZDkdt/Picsart-26-06-13-09-31-41-765.png" },
+  { id: 5, name: "Product #5 — Hot Selling Item",     price: 399, img: "https://i.ibb.co/PpDH0k8/IMG-20260613-093218.png" },
+  { id: 6, name: "Product #6 — Customer Favourite",   price: 399, img: "https://i.ibb.co/k64g14Z8/IMG-20260613-121307.jpg" },
 ];
 
 let cart = []; // {id, name, price, img, qty}
@@ -714,7 +714,7 @@ document.getElementById('orderForm').addEventListener('submit', function (e) {
 
   const fullAddress = `${address}, ${city}, ${state} - ${pincode}`;
 
-  const itemsListText = cart.map(c => `${c.name} x${c.qty} = ₹${c.price * c.qty}`).join('\n');
+  const itemsListText = cart.map(c => `${c.name} x${c.qty} = ₹${c.price * c.qty}\nImage: ${c.img}`).join('\n\n');
 
   const orderId = "VPS" + Date.now().toString().slice(-6);
 
