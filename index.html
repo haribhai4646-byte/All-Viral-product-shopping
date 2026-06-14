@@ -395,7 +395,7 @@
     <form id="orderForm">
       <div class="form-group">
         <label for="fullName">Full Name</label>
-        <input type="text" id="fullName" required placeholder="e.g. Hari Bhai" />
+        <input type="text" id="fullName" required placeholder="Apna pura naam likhein" />
       </div>
 
       <div class="form-group">
@@ -462,6 +462,17 @@
 
       <button type="submit" class="btn btn-secondary btn-block" id="placeOrderBtn">Place Order</button>
     </form>
+  </div>
+</div>
+
+<!-- ================= PAYMENT CONFIRM MODAL ================= -->
+<div class="modal" id="payConfirmModal">
+  <div class="modal-box thanks-box">
+    <div class="emoji">💸</div>
+    <h2>Payment Ho Gayi?</h2>
+    <p id="payConfirmText">Kya aapne payment successfully kar di?<br><br>Agar payment ho gayi hai tabhi "Haan, Payment Ho Gayi" dabayein — tabhi aapka order place hoga.</p>
+    <button class="btn btn-primary btn-block" id="payYesBtn" style="margin-bottom:10px;">✅ Haan, Payment Ho Gayi</button>
+    <button class="btn btn-outline btn-block" id="payNoBtn">❌ Nahi, Payment Cancel Ki</button>
   </div>
 </div>
 
@@ -734,39 +745,71 @@ document.getElementById('orderForm').addEventListener('submit', function (e) {
   placeBtn.disabled = true;
   placeBtn.textContent = "Placing Order...";
 
-  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-    .then(() => {
-      finishOrder(payMethod, upiApp, finalTotal, orderId);
-    })
-    .catch((err) => {
-      console.error("EmailJS error:", err);
-      // Even if email fails (e.g. EmailJS not configured yet), proceed so the
-      // customer experience isn't blocked. Replace the alert with your own
-      // handling once EmailJS keys above are configured.
-      finishOrder(payMethod, upiApp, finalTotal, orderId);
-    })
-    .finally(() => {
-      placeBtn.disabled = false;
-      placeBtn.textContent = "Place Order";
-    });
+  setTimeout(() => {
+    placeBtn.disabled = false;
+    placeBtn.textContent = "Place Order";
+    finishOrder(payMethod, upiApp, finalTotal, orderId, templateParams);
+  }, 500);
 });
 
-function finishOrder(payMethod, upiApp, amount, orderId) {
+// Stores pending order details for prepaid confirmation
+let pendingOrder = null;
+
+function finishOrder(payMethod, upiApp, amount, orderId, templateParams) {
   if (payMethod === 'PREPAID') {
+    // Save order details — will only complete after user confirms payment
+    pendingOrder = { templateParams, amount, orderId };
+
+    // Open UPI app
     redirectToUPI(upiApp, amount, orderId);
+
+    // After 2 seconds show confirmation screen
+    setTimeout(() => {
+      checkoutModal.classList.remove('open');
+      document.getElementById('payConfirmModal').classList.add('open');
+      overlay.classList.add('show');
+    }, 2000);
+
+  } else {
+    // COD — complete order immediately
+    completeOrder(templateParams);
   }
+}
+
+function completeOrder(templateParams) {
+  // Send email
+  emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams).catch(e => console.error(e));
 
   // Reset cart & form
   cart = [];
   renderCart();
   document.getElementById('orderForm').reset();
   selectPayMethod('COD');
+  pendingOrder = null;
 
   // Show thank-you popup
+  document.getElementById('payConfirmModal').classList.remove('open');
   checkoutModal.classList.remove('open');
   thanksModal.classList.add('open');
   overlay.classList.add('show');
 }
+
+// Payment confirmed — YES button
+document.getElementById('payYesBtn').addEventListener('click', () => {
+  if (pendingOrder) {
+    completeOrder(pendingOrder.templateParams);
+  }
+});
+
+// Payment cancelled — NO button
+document.getElementById('payNoBtn').addEventListener('click', () => {
+  document.getElementById('payConfirmModal').classList.remove('open');
+  overlay.classList.remove('show');
+  // Reopen checkout so they can try again or switch to COD
+  checkoutModal.classList.add('open');
+  overlay.classList.add('show');
+  alert("Order cancel ho gaya. Aap dobara try kar sakte hain ya COD select kar sakte hain.");
+});
 
 /* ============================================================
    UPI DEEP LINK (Paytm / PhonePe) with auto-filled amount
